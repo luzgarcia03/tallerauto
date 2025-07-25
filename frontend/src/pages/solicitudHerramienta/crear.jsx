@@ -1,0 +1,131 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../../api/api"; 
+
+const EditarSolicitudHerramienta = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    empleado_id: "",
+    fecha_solicitud: "",
+    fecha_requerida: "",
+    observaciones: "",
+    id_estado: 1,
+  });
+
+  useEffect(() => {
+    api
+      .get(`/solicitud-herramienta/${id}`)
+      .then((res) => {
+        const data = res.data;
+        setForm({
+          ...data,
+          fecha_solicitud: data.fecha_solicitud?.split("T")[0] || "",
+          fecha_requerida: data.fecha_requerida?.split("T")[0] || "",
+        });
+      })
+      .catch((err) => {
+        console.error("Error al cargar solicitud:", err);
+        alert("Error al obtener los datos");
+      });
+  }, [id]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    api
+      .put(`/solicitud-herramienta/${id}`, form) // ✅ sin /api
+      .then(() => {
+        alert("Solicitud actualizada correctamente");
+        navigate("/solicitud-herramienta");
+      })
+      .catch((err) => {
+        console.error("Error al actualizar la solicitud:", err);
+        alert("Error al guardar los cambios");
+      });
+  };
+
+  return (
+    <div className="container mt-4">
+      <div className="card">
+        <div className="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+          <h4 className="mb-0"><i className="fas fa-edit me-2"></i>Editar Solicitud de Herramienta</h4>
+          <button onClick={() => navigate("/solicitud-herramienta")} className="btn btn-outline-light">
+            <i className="fas fa-arrow-left me-1"></i> Volver
+          </button>
+        </div>
+        <div className="card-body">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label className="form-label">ID del Empleado</label>
+              <input
+                type="number"
+                name="empleado_id"
+                className="form-control"
+                value={form.empleado_id}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Fecha de Solicitud</label>
+              <input
+                type="date"
+                name="fecha_solicitud"
+                className="form-control"
+                value={form.fecha_solicitud}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Fecha Requerida</label>
+              <input
+                type="date"
+                name="fecha_requerida"
+                className="form-control"
+                value={form.fecha_requerida}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Observaciones</label>
+              <textarea
+                name="observaciones"
+                className="form-control"
+                value={form.observaciones}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">ID del Estado</label>
+              <input
+                type="number"
+                name="id_estado"
+                className="form-control"
+                value={form.id_estado}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary">
+              <i className="fas fa-save me-1"></i>Actualizar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EditarSolicitudHerramienta;
